@@ -3,6 +3,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddControllersWithViews();
 
+// Add session support
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);  // Set session timeout
+    options.Cookie.HttpOnly = true;  // Makes session cookie more secure
+    options.Cookie.IsEssential = true;  // Make session cookie essential for functionality
+});
+
 // Configure Keycloak authentication
 builder.Services.AddAuthentication(options =>
     {
@@ -12,19 +20,16 @@ builder.Services.AddAuthentication(options =>
     .AddCookie("Cookies")
     .AddOpenIdConnect("oidc", options =>
     {
-        options.Authority = "https://<your-keycloak-domain>/realms/<realm-name>";
+        options.Authority = "http://localhost:8080/realms/master";
         options.ClientId = "ssd";
-        options.ClientSecret = "6yteYiURIPXLqfzwYh9HHIktW34TYe5t";  // Only if you have a client secret (otherwise use public clients)
+        options.ClientSecret = "6yteYiURIPXLqfzwYh9HHIktW34TYe5t";
         options.ResponseType = "code"; // For authorization code flow
         options.SaveTokens = true; // Store tokens in the session
-        options.Scope.Add("openid");  // Default OpenID scope
-        options.Scope.Add("profile"); // Optional: Add other scopes like profile, email, etc.
-
-        // Redirect URI after login
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
         options.CallbackPath = "/signin-oidc";
-    
-        // Ensure the cookies are set properly
         options.SignedOutCallbackPath = "/signout-callback-oidc";
+        options.RequireHttpsMetadata = false;
     });
 
 // Add MVC with controllers
@@ -39,6 +44,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+// Enable session middleware
+app.UseSession();
 
 // Enable authentication and authorization
 app.UseAuthentication();  // Add authentication middleware

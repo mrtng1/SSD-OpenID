@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using SSD_OpenID.Models;
 
 namespace SSD_OpenID.Controllers;
 
@@ -56,19 +57,16 @@ public class AccountController : ControllerBase
     [HttpGet("callback")]
     public async Task<IActionResult> Callback([FromQuery] string state, [FromQuery] string code)
     {
-        // Validate that required query parameters are present.
         if (string.IsNullOrEmpty(state) || string.IsNullOrEmpty(code))
         {
             return BadRequest("Missing state or code parameter.");
         }
 
-        // Retrieve the previously stored codeVerifier using the state.
         if (!_cache.TryGetValue(state, out var codeVerifier))
         {
             return BadRequest("Invalid or expired state.");
         }
 
-        // Prepare parameters for exchanging the authorization code for tokens.
         var tokenParams = new Dictionary<string, string>
         {
             { "grant_type", "authorization_code" },
@@ -88,13 +86,19 @@ public class AccountController : ControllerBase
 
         var tokenResult = await tokenResponse.Content.ReadFromJsonAsync<TokenResponse>();
 
-        // Optionally fetch user info using the access token.
+        // Store the token and user info in the session or cookies
+        HttpContext.Session.SetString("AccessToken", tokenResult.access_token);
+        HttpContext.Session.SetString("IdToken", tokenResult.id_token);
+
+        // Optionally fetch user info
         httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {tokenResult.access_token}");
         var userInfoResponse = await httpClient.GetAsync(userInfoEndpoint);
         var userInfo = await userInfoResponse.Content.ReadAsStringAsync();
 
-        // Return a JSON result with token and user information.
-        return Ok(new { tokenResult, userInfo });
+        // Store the user info in the session or cookies as needed
+        HttpContext.Session.SetString("UserInfo", userInfo);
+
+        return RedirectToAction("Index", "Home");
     }
 
     // Helper method: Generate a secure random string.
@@ -108,15 +112,4 @@ public class AccountController : ControllerBase
             .Replace("/", "_")
             .Replace("=", "");
     }
-}
-
-// Model representing the token response from Keycloak.
-public class TokenResponse
-{
-    public string access_token { get; set; }
-    public int expires_in { get; set; }
-    public string id_token { get; set; }
-    public string scope { get; set; }
-    public string token_type { get; set; }
-    public string refresh_token { get; set; }
 }

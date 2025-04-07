@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SSD-OpenID")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+698f89546cb7d50c9448aaaabee879401654e835")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e98488370467ed208aabb3daec03a6f8e01ac0ee")]
 [assembly: System.Reflection.AssemblyProductAttribute("SSD-OpenID")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SSD-OpenID")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

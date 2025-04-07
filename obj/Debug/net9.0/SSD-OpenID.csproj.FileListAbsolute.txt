@@ -96,3 +96,14 @@ C:\Users\mrtng\source\repos\SSD-OpenID\obj\Debug\net9.0\refint\SSD-OpenID.dll
 C:\Users\mrtng\source\repos\SSD-OpenID\obj\Debug\net9.0\SSD-OpenID.pdb
 C:\Users\mrtng\source\repos\SSD-OpenID\obj\Debug\net9.0\SSD-OpenID.genruntimeconfig.cache
 C:\Users\mrtng\source\repos\SSD-OpenID\obj\Debug\net9.0\ref\SSD-OpenID.dll
+C:\Users\mrtng\source\repos\SSD-OpenID\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\mrtng\source\repos\SSD-OpenID\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.OpenIdConnect.dll
+C:\Users\mrtng\source\repos\SSD-OpenID\bin\Debug\net9.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\mrtng\source\repos\SSD-OpenID\bin\Debug\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\mrtng\source\repos\SSD-OpenID\bin\Debug\net9.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\mrtng\source\repos\SSD-OpenID\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\mrtng\source\repos\SSD-OpenID\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\mrtng\source\repos\SSD-OpenID\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\mrtng\source\repos\SSD-OpenID\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\mrtng\source\repos\SSD-OpenID\obj\Debug\net9.0\SSD-OpenID.csproj.AssemblyReference.cache
+C:\Users\mrtng\source\repos\SSD-OpenID\obj\Debug\net9.0\SSD-OpenID.csproj.Up2Date
