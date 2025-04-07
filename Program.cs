@@ -1,25 +1,27 @@
+using DotNetEnv;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
 builder.Services.AddControllersWithViews();
 
-// Add session support
+//session
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);  // Set session timeout
-    options.Cookie.HttpOnly = true;  // Makes session cookie more secure
-    options.Cookie.IsEssential = true;  // Make session cookie essential for functionality
+    options.IdleTimeout = TimeSpan.FromMinutes(30);  // session timeout
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true; 
 });
 
-// Configure Keycloak authentication
+// Keycloak authentication
 builder.Services.AddAuthentication(options =>
     {
-        options.DefaultScheme = "Cookies"; // Default cookies for session
-        options.DefaultChallengeScheme = "oidc"; // Default to OpenID Connect
+        options.DefaultScheme = "Cookies";
+        options.DefaultChallengeScheme = "oidc";
     })
     .AddCookie("Cookies")
     .AddOpenIdConnect("oidc", options =>
     {
+        Environment.GetEnvironmentVariable("KEYCLOAK_CLIENT_ID");
         options.Authority = "http://localhost:8080/realms/master";
         options.ClientId = "ssd";
         options.ClientSecret = "6yteYiURIPXLqfzwYh9HHIktW34TYe5t";
@@ -32,10 +34,8 @@ builder.Services.AddAuthentication(options =>
         options.RequireHttpsMetadata = false;
     });
 
-// Add MVC with controllers
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -45,11 +45,9 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
-// Enable session middleware
 app.UseSession();
 
-// Enable authentication and authorization
-app.UseAuthentication();  // Add authentication middleware
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -59,5 +57,7 @@ app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+Env.Load();
 
 app.Run();

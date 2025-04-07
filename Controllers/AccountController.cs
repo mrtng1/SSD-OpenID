@@ -1,4 +1,8 @@
-﻿using System.Security.Cryptography;
+﻿using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using SSD_OpenID.Models;
@@ -12,16 +16,15 @@ public class AccountController : ControllerBase
     // In-memory cache to store code_verifiers keyed by state.
     private static readonly Dictionary<string, string> _cache = new();
 
-    // Keycloak configuration values – adjust these values accordingly.
-    private readonly string clientId = "ssd";
-    private readonly string clientSecret = "6yteYiURIPXLqfzwYh9HHIktW34TYe5t";
-    private readonly string callbackUrl = "https://localhost:7235/account/callback";
+    private readonly string clientId = Environment.GetEnvironmentVariable("KEYCLOAK_CLIENT_ID");
+    private readonly string clientSecret = Environment.GetEnvironmentVariable("KEYCLOAK_CLIENT_SECRET");
+    private readonly string callbackUrl = Environment.GetEnvironmentVariable("KEYCLOAK_CALLBACK_URL");
 
-    // Hard-coded Keycloak endpoints (for demonstration only; production apps should load these from configuration).
-    private readonly string authorizationEndpoint = "http://localhost:8080/realms/master/protocol/openid-connect/auth";
-    private readonly string tokenEndpoint = "http://localhost:8080/realms/master/protocol/openid-connect/token";
-    private readonly string userInfoEndpoint = "http://localhost:8080/realms/master/protocol/openid-connect/userinfo";
-    private readonly string jwksUri = "http://localhost:8080/realms/master/protocol/openid-connect/certs";
+    private readonly string authorizationEndpoint = Environment.GetEnvironmentVariable("KEYCLOAK_AUTH_ENDPOINT");
+    private readonly string tokenEndpoint = Environment.GetEnvironmentVariable("KEYCLOAK_TOKEN_ENDPOINT");
+    private readonly string userInfoEndpoint = Environment.GetEnvironmentVariable("KEYCLOAK_USERINFO_ENDPOINT");
+    private readonly string jwksUri = Environment.GetEnvironmentVariable("KEYCLOAK_JWKS_URI");
+
 
     // GET /login endpoint
     [HttpGet("login")]
@@ -84,7 +87,7 @@ public class AccountController : ControllerBase
             return BadRequest("Error exchanging code for token.");
         }
 
-        var tokenResult = await tokenResponse.Content.ReadFromJsonAsync<TokenResponse>();
+        TokenResponse tokenResult = await tokenResponse.Content.ReadFromJsonAsync<TokenResponse>();
 
         // Store the token and user info in the session or cookies
         HttpContext.Session.SetString("AccessToken", tokenResult.access_token);
@@ -97,7 +100,31 @@ public class AccountController : ControllerBase
 
         // Store the user info in the session or cookies as needed
         HttpContext.Session.SetString("UserInfo", userInfo);
+        var userInfoJson = JsonDocument.Parse(userInfo);
+        var root = userInfoJson.RootElement;
+        string sub = root.GetProperty("sub").GetString();
+        string username = root.GetProperty("preferred_username").GetString();
+        
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, sub),
+            new Claim(ClaimTypes.Name, username),
+        };
+        
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+        
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
+        
+        return RedirectToAction("Index", "Home");
+    }
+    
+    [HttpGet("logout")]
+    public IActionResult Logout()
+    {
+        HttpContext.SignOutAsync();
+        HttpContext.Session.Clear();
         return RedirectToAction("Index", "Home");
     }
 
